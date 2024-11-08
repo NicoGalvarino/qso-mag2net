@@ -7,7 +7,7 @@ seed_value = 42
 
 import os
 #setting gpu
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # setting random seeds
 os.environ['PYTHONHASHSEED']=str(seed_value)
@@ -31,13 +31,28 @@ import sys
 sys.path.append('../notebooks/')
 from generators import generator_fiducial_model
 
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
-config = ConfigProto()
-config.gpu_options.allow_growth = True
+# this part is for tf 1.x and deprecated
+# translate for tf 2.x -> tf.config is used instead
+# ------------------------------------------------------------------------------
+gpu = tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpu))
 
-session = InteractiveSession(config=config)
-os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
+# from tensorflow.compat.v1 import ConfigProto  # config of the gpu session
+# config = ConfigProto()
+# config.gpu_options.allow_growth = True  # gpu memory used grows as needed
+#                                         # instead of using the full gpu memory from the start
+tf.config.experimental.set_memory_growth(gpu, True)
+
+# from tensorflow.compat.v1 import InteractiveSession
+# session = InteractiveSession(config=config)  # makes current session the default one
+                                               # no need for passing a session obj to use tf operations
+                                               # also runs tf operations immediately instead of default
+                                               # by default added to a comp. graph and executed later
+# eager execution and automatic session management by default in tf 2.x
+
+# ------------------------------------------------------------------------------
+
+os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'  # ?
 
 # decay of the learning rate
 def step_decay(epoch):
@@ -57,11 +72,11 @@ base_name = # save name of the model
 model_path = # save path of the model
 logger_path = # path to the log files to be created
 checkpoint_path = # path to the checkpoints to be created
-dim_1 = 6316
+dim_1 = 6316  # number of pixels in the spectra
 
 
 # generator initial setup
-dim = (dim_1,1)
+dim = (dim_1, 1)
 params_generator = {'dim': (dim_1,),
           'batch_size': 500,
           'n_classes': 1,
@@ -81,7 +96,11 @@ X = AveragePooling1D(3)(X)
 X = Flatten()(X)
 X = Dense(512, activation='relu')(X)
 X = Dense(512, activation='relu')(X)
+
+# classification output
 X_class_dense_out = Dense(1, activation='sigmoid', name='out_class')(X)
+
+# regression output
 X_reg_dense_out = Dense(1, activation='relu', name='out_reg')(X)
 
 lr_scheduler = LearningRateScheduler(step_decay)
@@ -95,8 +114,12 @@ model_checkpoint_callback = ModelCheckpoint(filepath=checkpoint_path+base_name,
                                             save_weights_only=False,
                                             save_best_only=True)
 
-model = keras.Model(inputs = X_input, outputs = [X_class_dense_out,X_reg_dense_out])
-model.compile(optimizer=opt, loss = {'out_reg':'MAE', 'out_class':'binary_crossentropy'}, metrics = {'out_reg':'MAE', 'out_class':'accuracy'}, loss_weights={'out_reg':1., 'out_class':300})
+model = keras.Model(inputs = X_input, outputs = [X_class_dense_out, X_reg_dense_out])
+model.compile(optimizer=opt, 
+              loss = {'out_reg':'MAE', 'out_class':'binary_crossentropy'}, 
+              metrics = {'out_reg':'MAE', 'out_class':'accuracy'}, 
+              loss_weights={'out_reg':1., 'out_class':300}  # why theses weights?
+              )
 
 print(model.summary())
 
@@ -108,11 +131,16 @@ list_IDs_validation = range(0, sample_size)
 
 list_IDs_validation = np.setdiff1d(list_IDs_validation, list_IDs_training)
 
-training_generator = generator_WLfull.DataGenerator(list_IDs_training, sample, 'absorber_true', 'cent_WL_2796',  **params_generator)
-validation_generator = generator_WLfull.DataGenerator(list_IDs_validation, sample, 'absorber_true', 'cent_WL_2796', **params_generator)
+training_generator = generator_WLfull.DataGenerator(list_IDs_training, sample, 'absorber_true', 
+                                                    'cent_WL_2796',  **params_generator)
+validation_generator = generator_WLfull.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
+                                                      'cent_WL_2796', **params_generator)
 
 # model fitting
-history = model.fit(training_generator, validation_data = validation_generator, epochs=150, verbose=1, shuffle=True, callbacks=[lr_scheduler, csv_logger, model_checkpoint_callback])
+history = model.fit(training_generator, validation_data = validation_generator, 
+                    epochs=150, verbose=1, shuffle=True, 
+                    callbacks=[lr_scheduler, csv_logger, model_checkpoint_callback]
+                    )
 
-#saving model
+# saving model
 model.save(model_path+base_name+'_model')

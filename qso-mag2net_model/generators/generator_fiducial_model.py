@@ -2,9 +2,8 @@
 # (sorry documentation currently very sparse and  code 
 # not too pretty but should do for now)
 
+# imports and seeds
 seed_value = 42
-
-
 import keras
 import os
 os.environ['PYTHONHASHSEED']=str(seed_value)
@@ -18,7 +17,8 @@ tf.random.set_seed(seed_value)
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, list_IDs, data_hdf5, label_name_class, label_name_reg, batch_size=32, dim=(10958,), n_channels=1,
+    def __init__(self, list_IDs, data_hdf5, label_name_class, label_name_reg, 
+                 batch_size=32, dim=(10958,), n_channels=1,
                  n_classes=2, shuffle=True):
         'Initialization'
         self.dim = dim
@@ -71,3 +71,6 @@ class DataGenerator(keras.utils.Sequence):
             y_reg[i] = data_hdf5[label_name_reg][ID]
 
         return X, {'out_class': y_class, 'out_reg': y_reg}
+
+# why is this needed for qso-mag2net_model_example.py?
+# batch management and creation should be automatic in keras
