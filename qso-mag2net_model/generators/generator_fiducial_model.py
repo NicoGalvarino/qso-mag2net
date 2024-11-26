@@ -54,7 +54,7 @@ class DataGenerator(keras.utils.Sequence):
         X, y = self.__data_generation(list_IDs_temp, self.data_hdf5, self.label_name_class, self.label_name_reg)
         
         return X, y
-            
+    
     def __data_generation(self, list_IDs_temp, data_hdf5, label_name_class, label_name_reg):
         'Generates data containing batch_size samples' # X : (n_samples, *dim, n_channels)
         # Initialization
@@ -64,7 +64,7 @@ class DataGenerator(keras.utils.Sequence):
 
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
-            X[i,] = data_hdf5['flux'][ID]
+            X[i, ] = data_hdf5['flux'][ID]
 
         # Store class
             y_class[i] = data_hdf5[label_name_class][ID]

@@ -27,8 +27,8 @@ from keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
 # generator used for training
-import sys
-sys.path.append('../notebooks/')
+# import sys
+# sys.path.append('../notebooks/')
 from generators import generator_fiducial_model
 
 # this part is for tf 1.x and deprecated
@@ -66,22 +66,22 @@ def step_decay(epoch):
         lrate = 0.000001
     return lrate
 
-sample = # sample path 
+# sample = # sample path 
 
-base_name = # save name of the model
-model_path = # save path of the model
-logger_path = # path to the log files to be created
-checkpoint_path = # path to the checkpoints to be created
+base_name = input('Name of the model ')  # save name of the model
+model_path = './trained_model/'  # save path of the model
+logger_path = './logfiles/'  # path to the log files to be created
+checkpoint_path = './checkpoints/'  # path to the checkpoints to be created
 dim_1 = 6316  # number of pixels in the spectra
 
 
 # generator initial setup
 dim = (dim_1, 1)
-params_generator = {'dim': (dim_1,),
-          'batch_size': 500,
-          'n_classes': 1,
-          'n_channels': 1,
-          'shuffle': True}
+params_generator = {'dim': (dim_1,), 
+                    'batch_size': 500,
+                    'n_classes': 1,
+                    'n_channels': 1,
+                    'shuffle': True}
 
 # model setup 
 X_input = keras.Input(dim)
@@ -107,7 +107,6 @@ lr_scheduler = LearningRateScheduler(step_decay)
 csv_logger = CSVLogger(logger_path + base_name + '_history.csv', append=True)
 opt = Adam(0.001)
 
-
 model_checkpoint_callback = ModelCheckpoint(filepath=checkpoint_path+base_name, 
                                             monitor='val_loss',
                                             mode='min',
@@ -131,9 +130,13 @@ list_IDs_validation = range(0, sample_size)
 
 list_IDs_validation = np.setdiff1d(list_IDs_validation, list_IDs_training)
 
-training_generator = generator_WLfull.DataGenerator(list_IDs_training, sample, 'absorber_true', 
+# training_generator = generator_WLfull.DataGenerator(list_IDs_training, sample, 'absorber_true', 
+#                                                     'cent_WL_2796',  **params_generator)
+# validation_generator = generator_WLfull.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
+#                                                       'cent_WL_2796', **params_generator)
+training_generator = generator_fiducial_model.DataGenerator(list_IDs_training, sample, 'absorber_true', 
                                                     'cent_WL_2796',  **params_generator)
-validation_generator = generator_WLfull.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
+validation_generator = generator_fiducial_model.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
                                                       'cent_WL_2796', **params_generator)
 
 # model fitting
