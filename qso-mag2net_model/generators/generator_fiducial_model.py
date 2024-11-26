@@ -30,7 +30,7 @@ class DataGenerator(keras.utils.Sequence):
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.shuffle = shuffle
-        self.on_epoch_end()
+        self.on_epoch_end()  # initialize indices
     
     def __len__(self):
         'Denotes the number of batches per epoch'
