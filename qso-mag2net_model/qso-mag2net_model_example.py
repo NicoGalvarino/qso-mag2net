@@ -17,13 +17,14 @@ import numpy as np
 np.random.seed(seed_value)
 import tensorflow as tf
 tf.random.set_seed(seed_value)
+# tf.set_random_seed(seed_value)
 
 # other imports
 import h5py
-import keras  # type: ignore
-from keras.models import Sequential  # type: ignore
-from keras.layers import Conv1D, MaxPooling1D, Dense, AveragePooling1D, Flatten  # type: ignore
-from keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint  # type: ignore
+import keras
+from keras.models import Sequential
+from keras.layers import Conv1D, MaxPooling1D, Dense, AveragePooling1D, Flatten
+from keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam  # type: ignore
 
 # generator used for training

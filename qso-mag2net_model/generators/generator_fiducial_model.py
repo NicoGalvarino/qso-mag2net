@@ -13,6 +13,7 @@ import numpy as np
 np.random.seed(seed_value)
 import tensorflow as tf
 tf.random.set_seed(seed_value)
+# tf.set_random_seed(seed_value)
 
 
 class DataGenerator(keras.utils.Sequence):
