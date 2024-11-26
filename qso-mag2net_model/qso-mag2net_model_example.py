@@ -20,11 +20,11 @@ tf.random.set_seed(seed_value)
 
 # other imports
 import h5py
-import keras
-from keras.models import Sequential
-from keras.layers import Conv1D, MaxPooling1D, Dense, AveragePooling1D, Flatten
-from keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint
-from tensorflow.keras.optimizers import Adam
+import keras  # type: ignore
+from keras.models import Sequential  # type: ignore
+from keras.layers import Conv1D, MaxPooling1D, Dense, AveragePooling1D, Flatten  # type: ignore
+from keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint  # type: ignore
+from tensorflow.keras.optimizers import Adam  # type: ignore
 
 # generator used for training
 # import sys
@@ -66,7 +66,8 @@ def step_decay(epoch):
         lrate = 0.000001
     return lrate
 
-# sample = # sample path 
+sample = h5py.File('./../../spectra_Roland/samples/training_samples/real_samples/WL_fixed/SNRfull_WLfull_range_fixed_ygap.hdf5', 'r')
+# sample path -> training data only?
 
 base_name = input('Name of the model ')  # save name of the model
 model_path = './trained_model/'  # save path of the model
@@ -125,7 +126,7 @@ print(model.summary())
 sample_size = len(sample['flux'])
 
 # training validation split and further generator setup
-list_IDs_training = random.sample(range(sample_size), int(sample_size*0.8))
+list_IDs_training = random.sample(range(sample_size), int(sample_size*0.8))  # 80% for training
 list_IDs_validation = range(0, sample_size)
 
 list_IDs_validation = np.setdiff1d(list_IDs_validation, list_IDs_training)
@@ -135,15 +136,18 @@ list_IDs_validation = np.setdiff1d(list_IDs_validation, list_IDs_training)
 # validation_generator = generator_WLfull.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
 #                                                       'cent_WL_2796', **params_generator)
 training_generator = generator_fiducial_model.DataGenerator(list_IDs_training, sample, 'absorber_true', 
-                                                    'cent_WL_2796',  **params_generator)
+                                                            'cent_WL_2796',  **params_generator)
 validation_generator = generator_fiducial_model.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
-                                                      'cent_WL_2796', **params_generator)
+                                                              'cent_WL_2796', **params_generator)
 
 # model fitting
-history = model.fit(training_generator, validation_data = validation_generator, 
-                    epochs=150, verbose=1, shuffle=True, 
+history = model.fit(training_generator, 
+                    validation_data=validation_generator, 
+                    epochs=150, 
+                    verbose=1, 
+                    shuffle=True, 
                     callbacks=[lr_scheduler, csv_logger, model_checkpoint_callback]
                     )
 
 # saving model
-model.save(model_path+base_name+'_model')
+model.save(model_path + base_name + '_model')

@@ -4,7 +4,7 @@
 
 # imports and seeds
 seed_value = 42
-import keras
+import keras  # type: ignore
 import os
 os.environ['PYTHONHASHSEED']=str(seed_value)
 import random
