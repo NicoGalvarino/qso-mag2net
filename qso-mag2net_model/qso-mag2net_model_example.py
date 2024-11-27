@@ -38,14 +38,15 @@ from generators import generator_fiducial_model
 gpu = tf.config.list_physical_devices('GPU')
 print("Num GPUs Available: ", len(gpu))
 
-# from tensorflow.compat.v1 import ConfigProto  # config of the gpu session
-# config = ConfigProto()
-# config.gpu_options.allow_growth = True  # gpu memory used grows as needed
+from tensorflow.compat.v1 import ConfigProto  # config of the gpu session
+config = ConfigProto()
+# tf.config.gpu_options.allow_growth = True  # gpu memory used grows as needed
 #                                         # instead of using the full gpu memory from the start
-tf.config.experimental.set_memory_growth(gpu, True)
+# tf.config.experimental.set_memory_growth(gpu, True)
+config.gpu_options.allow_growth = True
 
-# from tensorflow.compat.v1 import InteractiveSession
-# session = InteractiveSession(config=config)  # makes current session the default one
+from tensorflow.compat.v1 import InteractiveSession
+session = InteractiveSession(config=config)  # makes current session the default one
                                                # no need for passing a session obj to use tf operations
                                                # also runs tf operations immediately instead of default
                                                # by default added to a comp. graph and executed later
@@ -76,11 +77,12 @@ logger_path = './logfiles/'  # path to the log files to be created
 checkpoint_path = './checkpoints/'  # path to the checkpoints to be created
 dim_1 = 6316  # number of pixels in the spectra
 
+batch_size_ = 500  # to-do: increase to make training faster
 
 # generator initial setup
 dim = (dim_1, 1)
 params_generator = {'dim': (dim_1,), 
-                    'batch_size': 500,
+                    'batch_size': batch_size_,
                     'n_classes': 1,
                     'n_channels': 1,
                     'shuffle': True}
@@ -141,10 +143,12 @@ training_generator = generator_fiducial_model.DataGenerator(list_IDs_training, s
 validation_generator = generator_fiducial_model.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
                                                               'cent_WL_2796', **params_generator)
 
+n_epochs = 10
+
 # model fitting
 history = model.fit(training_generator, 
                     validation_data=validation_generator, 
-                    epochs=150, 
+                    epochs=n_epochs, 
                     verbose=1, 
                     shuffle=True, 
                     callbacks=[lr_scheduler, csv_logger, model_checkpoint_callback]
