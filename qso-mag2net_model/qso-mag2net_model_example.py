@@ -38,14 +38,14 @@ from generators import generator_fiducial_model
 gpu = tf.config.list_physical_devices('GPU')
 print("Num GPUs Available: ", len(gpu))
 
-from tensorflow.compat.v1 import ConfigProto  # config of the gpu session
+from tensorflow.compat.v1 import ConfigProto # type: ignore # config of the gpu session
 config = ConfigProto()
 # tf.config.gpu_options.allow_growth = True  # gpu memory used grows as needed
 #                                         # instead of using the full gpu memory from the start
 # tf.config.experimental.set_memory_growth(gpu, True)
 config.gpu_options.allow_growth = True
 
-from tensorflow.compat.v1 import InteractiveSession
+from tensorflow.compat.v1 import InteractiveSession # type: ignore
 session = InteractiveSession(config=config)  # makes current session the default one
                                                # no need for passing a session obj to use tf operations
                                                # also runs tf operations immediately instead of default
@@ -71,13 +71,15 @@ def step_decay(epoch):
 sample = h5py.File('./../../spectra_Roland/samples/training_samples/real_samples/WL_fixed/SNRfull_WLfull_range_fixed_ygap.hdf5', 'r')
 # sample path -> training data only?
 
-base_name = input('Name of the model ')  # save name of the model
+n_epochs = 5
+batch_size_ = 526  # to-do: increase to make training faster
+
+base_name_ = input('Name of the model ')  # save name of the model
+base_name = base_name_ + '_' + str(n_epochs) + '_epochs_' + str(batch_size_) + '_batchsize'
 model_path = './trained_model/'  # save path of the model
 logger_path = './logfiles/'  # path to the log files to be created
 checkpoint_path = './checkpoints/'  # path to the checkpoints to be created
 dim_1 = 6316  # number of pixels in the spectra
-
-batch_size_ = 500  # to-do: increase to make training faster
 
 # generator initial setup
 dim = (dim_1, 1)
@@ -142,8 +144,6 @@ training_generator = generator_fiducial_model.DataGenerator(list_IDs_training, s
                                                             'cent_WL_2796',  **params_generator)
 validation_generator = generator_fiducial_model.DataGenerator(list_IDs_validation, sample, 'absorber_true', 
                                                               'cent_WL_2796', **params_generator)
-
-n_epochs = 10
 
 # model fitting
 history = model.fit(training_generator, 
