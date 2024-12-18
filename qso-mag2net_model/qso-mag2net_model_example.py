@@ -69,10 +69,10 @@ def step_decay(epoch):
     return lrate
 
 sample = h5py.File('./../../spectra_Roland/samples/training_samples/real_samples/WL_fixed/SNRfull_WLfull_range_fixed_ygap.hdf5', 'r')
-# sample path -> training data only?
+# sample path -> training data only
 
 n_epochs = 5
-batch_size_ = 526  # to-do: increase to make training faster
+batch_size_ = 526
 
 base_name_ = input('Name of the model ')  # save name of the model
 base_name = base_name_ + '_' + str(n_epochs) + '_epochs_' + str(batch_size_) + '_batchsize'
@@ -156,3 +156,4 @@ history = model.fit(training_generator,
 
 # saving model
 model.save(model_path + base_name + '_model')
+
