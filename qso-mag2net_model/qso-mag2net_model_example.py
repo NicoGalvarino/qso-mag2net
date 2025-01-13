@@ -5,12 +5,24 @@
 # random seed
 seed_value = 42
 
-import os
+# gpu_info = !nvidia-smi
+# gpu_info = '\n'.join(gpu_info)
+# if gpu_info.find('failed') >= 0:
+#     print('Select the Runtime > "Change runtime type" menu to enable a GPU accelerator, ')
+#     print('and then re-execute this cell.')
+# else:
+#     print(gpu_info)
+
+print('\n')
+
+# import os
 #setting gpu
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 # setting random seeds
-os.environ['PYTHONHASHSEED']=str(seed_value)
+# os.environ['PYTHONHASHSEED'] = str(seed_value)
+print('\n')
+
 import random
 random.seed(seed_value)
 import numpy as np
@@ -35,18 +47,18 @@ from generators import generator_fiducial_model
 # this part is for tf 1.x and deprecated
 # translate for tf 2.x -> tf.config is used instead
 # ------------------------------------------------------------------------------
-gpu = tf.config.list_physical_devices('GPU')
-print("Num GPUs Available: ", len(gpu))
+# gpu = tf.config.list_physical_devices('GPU')
+# print("Num GPUs Available: ", len(gpu))
 
-from tensorflow.compat.v1 import ConfigProto # type: ignore # config of the gpu session
-config = ConfigProto()
+# from tensorflow.compat.v1 import ConfigProto # type: ignore # config of the gpu session
+# config = ConfigProto()
 # tf.config.gpu_options.allow_growth = True  # gpu memory used grows as needed
 #                                         # instead of using the full gpu memory from the start
 # tf.config.experimental.set_memory_growth(gpu, True)
-config.gpu_options.allow_growth = True
+# config.gpu_options.allow_growth = True
 
-from tensorflow.compat.v1 import InteractiveSession # type: ignore
-session = InteractiveSession(config=config)  # makes current session the default one
+# from tensorflow.compat.v1 import InteractiveSession # type: ignore
+# session = InteractiveSession(config=config)  # makes current session the default one
                                                # no need for passing a session obj to use tf operations
                                                # also runs tf operations immediately instead of default
                                                # by default added to a comp. graph and executed later
@@ -54,7 +66,7 @@ session = InteractiveSession(config=config)  # makes current session the default
 
 # ------------------------------------------------------------------------------
 
-os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'  # ?
+# os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
 
 # decay of the learning rate
 def step_decay(epoch):
@@ -72,7 +84,7 @@ sample = h5py.File('./../../spectra_Roland/samples/training_samples/real_samples
 # sample path -> training data only
 
 n_epochs = 5
-batch_size_ = 526
+batch_size_ = 500
 
 base_name_ = input('Name of the model ')  # save name of the model
 base_name = base_name_ + '_' + str(n_epochs) + '_epochs_' + str(batch_size_) + '_batchsize'
@@ -113,7 +125,7 @@ lr_scheduler = LearningRateScheduler(step_decay)
 csv_logger = CSVLogger(logger_path + base_name + '_history.csv', append=True)
 opt = Adam(0.001)
 
-model_checkpoint_callback = ModelCheckpoint(filepath=checkpoint_path+base_name, 
+model_checkpoint_callback = ModelCheckpoint(filepath=checkpoint_path+base_name+'.keras', 
                                             monitor='val_loss',
                                             mode='min',
                                             save_weights_only=False,
@@ -155,5 +167,5 @@ history = model.fit(training_generator,
                     )
 
 # saving model
-model.save(model_path + base_name + '_model')
+model.save(model_path + base_name + '_model' + '.keras')
 
