@@ -69,21 +69,21 @@ from generators import generator_fiducial_model
 # os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
 
 # decay of the learning rate
-def step_decay(epoch):
-    if epoch >=0 and epoch < 20:
-        lrate = 0.001
-    if epoch >= 20 and epoch < 80:
-        lrate = 0.0001
-    if epoch >= 80 and epoch < 120:
-        lrate = 0.00001
-    if epoch >= 120 and epoch <= 150:
-        lrate = 0.000001
-    return lrate
+# def step_decay(epoch):
+#     if epoch >=0 and epoch < 20:
+#         lrate = 0.001
+#     if epoch >= 20 and epoch < 80:
+#         lrate = 0.0001
+#     if epoch >= 80 and epoch < 120:
+#         lrate = 0.00001
+#     if epoch >= 120:  # and epoch <= 150:
+#         lrate = 0.000001
+#     return lrate
 
-sample = h5py.File('./../../spectra_Roland/samples/training_samples/real_samples/WL_fixed/SNRfull_WLfull_range_fixed_ygap.hdf5', 'r')
+sample = h5py.File('./../../../spectra_Roland/samples/training_samples/real_samples/WL_fixed/SNRfull_WLfull_range_fixed_ygap.hdf5', 'r')
 # sample path -> training data only
 
-n_epochs = 5
+n_epochs = 200
 batch_size_ = 500
 
 base_name_ = input('Name of the model ')  # save name of the model
@@ -121,7 +121,7 @@ X_class_dense_out = Dense(1, activation='sigmoid', name='out_class')(X)
 # regression output
 X_reg_dense_out = Dense(1, activation='relu', name='out_reg')(X)
 
-lr_scheduler = LearningRateScheduler(step_decay)
+# lr_scheduler = LearningRateScheduler(step_decay)
 csv_logger = CSVLogger(logger_path + base_name + '_history.csv', append=True)
 opt = Adam(0.001)
 
@@ -163,7 +163,8 @@ history = model.fit(training_generator,
                     epochs=n_epochs, 
                     verbose=1, 
                     shuffle=True, 
-                    callbacks=[lr_scheduler, csv_logger, model_checkpoint_callback]
+                    callbacks=[  # lr_scheduler, 
+                                csv_logger, model_checkpoint_callback]
                     )
 
 # saving model
