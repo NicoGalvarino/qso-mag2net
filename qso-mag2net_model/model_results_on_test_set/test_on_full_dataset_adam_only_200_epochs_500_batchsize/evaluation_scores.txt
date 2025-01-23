@@ -1,0 +1,8 @@
+Classification Evaluation:
+Accuracy: 0.9845656340155206
+Precision: 0.9875359566180822
+Recall: 0.9815190746131454
+F1-score: 0.9845183226604939
+
+Regression Evaluation:
+MAE: 18.322186122252415
